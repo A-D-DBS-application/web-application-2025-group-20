@@ -5,21 +5,22 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    full_name = db.Column(db.Text, nullable=False)
-    role = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String, primary_key=True)
+    role = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class Debtor(db.Model):
-    __tablename__ = 'debtor'
+    __tablename__ = "debtors"
 
     national_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False)
-    address = db.Column(db.Text, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    address = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    financial_data_source = db.Column(db.Text)
+    financial_data_source = db.Column(db.String)
+    user_username = db.Column(db.String, db.ForeignKey("users.username"))
 
 
 
