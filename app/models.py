@@ -40,3 +40,20 @@ class AuditLog(db.Model):
 
     # Optional details JSON/text
     details = db.Column(db.Text)
+
+class FinancialData(db.Model):
+    __tablename__ = "financial_data"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    debtor_id = db.Column(db.Integer, db.ForeignKey("debtors.national_id"), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    
+    assets = db.Column(db.Numeric)
+    liabilities = db.Column(db.Numeric)
+    solvability_score = db.Column(db.Float)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Optional: relationship back to debtor
+    debtor = db.relationship("Debtor", backref="financial_records")
