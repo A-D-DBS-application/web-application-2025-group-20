@@ -1,5 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
-from .models import db, User, Debtor
+from app.models import db, User, Debtor, AuditLog
+from datetime import datetime
 from sqlalchemy import text, select
 main = Blueprint('main', __name__)
 
@@ -14,25 +15,53 @@ def login():
 
         if user:
             session["username"] = username_input
+            session["role"] = user.role
             return redirect(url_for("main.dashboard"))
         else:
             error_message = "Please enter a valid username."
 
     return render_template("index.html", error_message=error_message)
 
+def log_access(username, action, resource_type, resource_id, details=None):
+    print("LOGGING →", username, action, resource_type, resource_id)
+
+    entry = AuditLog(
+        username=username,
+        action=action,
+        resource_type=resource_type,
+        resource_id=str(resource_id),
+        details=details
+    )
+
+    db.session.add(entry)
+    db.session.commit()
+
 
 @main.route("/dashboard")
 def dashboard():
     username = session.get("username")
+    role = session.get("role")
     if not username:
         return redirect(url_for("main.login"))
 
-    # ✅ Use filter() with column reference, not filter_by()
     debtors = Debtor.query.filter(Debtor.user_username == username).all()
 
-    return render_template("dashboard.html", debtors=debtors, username=username)
+    # Log that the user accessed their debtor list
+    log_access(
+        username=username,
+        action="viewed list",
+        resource_type="Debtor",
+        resource_id="ALL"
+    )
 
-from flask import redirect, url_for, session
+    return render_template(
+    "dashboard.html",
+    debtors=debtors,
+    username=username,
+    user_role = role
+    )
+
+
 
 @main.route("/logout", methods=["POST"])
 def logout():
@@ -47,4 +76,48 @@ def dbtest():
         return "DB connection OK!"
     except Exception as e:
         return str(e)
-    
+
+
+@main.route("/audit")
+def audit_log():
+    if session.get("role") != "admin":
+        return "Unauthorized", 403
+
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+
+    return render_template("audit.html", logs=logs)
+
+from flask import jsonify, session, request
+from sqlalchemy import or_
+
+@main.route("/api/debtors")
+def api_debtors():
+    username = session.get("username")
+    if not username:
+        return jsonify([])  # not logged in, return empty
+
+    search_query = request.args.get("q", "").strip()
+
+    query = Debtor.query.filter(Debtor.user_username == username)
+
+    if search_query:
+        query = query.filter(
+            or_(
+                Debtor.name.ilike(f"%{search_query}%"),
+                Debtor.address.ilike(f"%{search_query}%"),
+                Debtor.national_id.cast(db.String).ilike(f"%{search_query}%")
+            )
+        )
+
+    debtors = query.all()
+
+    return jsonify([
+        {
+            "national_id": d.national_id,
+            "name": d.name,
+            "address": d.address,
+            "created_at": d.created_at.strftime("%Y-%m-%d %H:%M:%S") if d.created_at else "",
+            "financial_data_source": d.financial_data_source
+        }
+        for d in debtors
+    ])

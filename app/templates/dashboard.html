@@ -18,71 +18,137 @@
       0% { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
-    .fade-in-up {
-      animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .table-scroll {
-      max-height: 400px;
-      overflow-y: auto;
-    }
+    .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .table-scroll { max-height: 500px; overflow-y: auto; }
   </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
 
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md py-4 px-8 flex justify-between items-center">
-    <h1 class="text-xl font-semibold">Dashboard</h1>
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md py-4 px-8 flex justify-between items-center">
+  <h1 class="text-xl font-semibold">Dashboard</h1>
+
+  <div class="flex items-center space-x-4">
+    {% if is_admin %}
+    <a href="{{ url_for('main.audit_log') }}"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition">
+       View Audit Log
+    </a>
+    {% endif %}
+
     <form action="{{ url_for('main.logout') }}" method="POST">
       <button type="submit"
         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition">
         Logout
       </button>
     </form>
-  </header>
+  </div>
+</header>
 
-  <main class="container mx-auto mt-10 px-4 fade-in-up">
-    <!-- Welcome Card -->
-    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Welcome, {{ username }}!</h2>
-      <p class="text-gray-600 dark:text-gray-300">Here are your current debtors:</p>
-    </div>
+<main class="container mx-auto mt-10 px-4 fade-in-up">
 
-    <!-- Debtors Table Card -->
-    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6">
-      {% if debtors %}
-      <div class="overflow-x-auto table-scroll">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-200 dark:bg-gray-700">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">National ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Address</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Created At</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Financial Data Source</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {% for debtor in debtors %}
-            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-              <td class="px-6 py-4 whitespace-nowrap">{{ debtor.national_id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ debtor.name }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ debtor.address }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ debtor.created_at.strftime('%Y-%m-%d %H:%M:%S') if debtor.created_at else '' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ debtor.financial_data_source }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-200 p-4 rounded-lg text-center">
-        No debtors found for your account.
-      </div>
-      {% endif %}
-    </div>
-  </main>
+  <!-- Welcome Card -->
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 mb-6">
+    <h2 class="text-2xl font-semibold mb-2">Welcome, {{ username }}!</h2>
+    <p class="text-gray-600 dark:text-gray-300">Here are your current debtors:</p>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="mb-6 flex items-center">
+    <input type="text" id="searchInput" placeholder="Search by Name, ID or Address"
+           class="flex-1 px-4 py-2 rounded-l-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+
+    <button id="clearSearch"
+            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-r-xl transition ml-2 hidden">
+      Clear
+    </button>
+  </div>
+
+  <!-- Debtors Table -->
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 table-scroll">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead class="bg-gray-200 dark:bg-gray-700">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">National ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Address</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Financial Data Source</th>
+        </tr>
+      </thead>
+      <tbody id="debtorsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        {% for debtor in debtors %}
+        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+          <td class="px-6 py-4 whitespace-nowrap">{{ debtor.national_id }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ debtor.name }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ debtor.address }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ debtor.financial_data_source }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearSearch');
+const tbody = document.getElementById('debtorsTable');
+
+let debounceTimer;
+
+// Fetch debtors via API
+async function fetchDebtors(query) {
+    const response = await fetch(`/api/debtors?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+
+    // Clear table
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center px-6 py-4">No debtors found.</td></tr>`;
+        return;
+    }
+
+    // Populate table
+    data.forEach(d => {
+        const row = document.createElement('tr');
+        row.className = "hover:bg-gray-100 dark:hover:bg-gray-700 transition";
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${d.national_id}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${d.name}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${d.address}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${d.financial_data_source}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Debounce function
+function debounce(func, delay) {
+    return function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
+    }
+}
+
+// Live search
+searchInput.addEventListener('input', debounce(() => {
+    const query = searchInput.value.trim();
+    clearBtn.style.display = query ? 'inline-block' : 'none';
+    fetchDebtors(query);
+}, 300)); // 300ms debounce
+
+// Clear button
+clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    fetchDebtors('');
+});
+
+// Initial load
+fetchDebtors('');
+</script>
+
 </body>
 </html>
