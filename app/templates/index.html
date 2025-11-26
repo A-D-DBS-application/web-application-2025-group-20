@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | Company Name</title>
+  <title>Login | Solv.io</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     // Auto-apply system dark mode preference
@@ -50,12 +50,11 @@
 >
 
   <!-- Logo Placeholder -->
-  <div
-    class="w-36 h-36 mb-8 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded-2xl text-gray-600 dark:text-gray-300 font-bold text-lg select-none fade-in-up"
-    style="animation-delay: 0.1s"
-  >
-    LOGO
-  </div>
+<div class="mb-8 fade-in-up" style="animation-delay: 0.1s">
+  <img src="{{ url_for('static', filename='logo.png') }}"
+       alt="Company Logo"
+       class="w-36 h-36 object-contain rounded-2xl shadow-md bg-white dark:bg-gray-700 p-4" />
+</div>
 
   <!-- Login Card -->
   <div
