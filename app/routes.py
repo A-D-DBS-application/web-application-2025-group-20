@@ -121,3 +121,38 @@ def api_debtors():
         }
         for d in debtors
     ])
+
+@main.route("/add-debtor", methods=["GET"])
+def add_debtor_page():
+    username = session.get("username")
+    if not username:
+        return redirect(url_for("main.login"))
+
+    return render_template("add_debtor.html")
+
+@main.route("/add-debtor", methods=["POST"])
+def add_debtor_submit():
+    username = session.get("username")
+    if not username:
+        return redirect(url_for("main.login"))
+
+    national_id = request.form.get("national_id")
+    name = request.form.get("name")
+    address = request.form.get("address")
+    source = request.form.get("financial_data_source")
+
+    new_debtor = Debtor(
+        national_id=national_id,
+        name=name,
+        address=address,
+        financial_data_source=source,
+        user_username=username
+    )
+
+    db.session.add(new_debtor)
+    db.session.commit()
+
+    # optional logging
+    log_access(username, "created", "Debtor", national_id)
+
+    return redirect(url_for("main.dashboard"))
