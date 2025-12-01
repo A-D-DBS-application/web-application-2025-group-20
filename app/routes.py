@@ -156,3 +156,28 @@ def add_debtor_submit():
     log_access(username, "created", "Debtor", national_id)
 
     return redirect(url_for("main.dashboard"))
+
+@main.route("/debtor/<int:national_id>")
+def debtor_detail(national_id):
+    username = session.get("username")
+    if not username:
+        return redirect(url_for("main.login"))
+
+    debtor = Debtor.query.filter_by(national_id=national_id).first()
+
+    if not debtor:
+        return "Debtor not found", 404
+
+    # enforce that users only view their own debtors unless admin
+    if debtor.user_username != username and session.get("role") != "admin":
+        return "Forbidden", 403
+
+    # Log access
+    log_access(
+        username=username,
+        action="viewed detail",
+        resource_type="Debtor",
+        resource_id=national_id
+    )
+
+    return render_template("debtor_detail.html", debtor=debtor)

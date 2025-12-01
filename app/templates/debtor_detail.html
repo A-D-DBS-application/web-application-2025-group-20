@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debtor Details | Solv.io</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
+
+  <a href="{{ url_for('main.dashboard') }}"
+     class="text-blue-500 hover:underline mb-4 inline-block">
+     ← Back to Dashboard
+  </a>
+
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Debtor Overview</h1>
+
+    <div class="space-y-3">
+      <p><strong>National ID:</strong> {{ debtor.national_id }}</p>
+      <p><strong>Name:</strong> {{ debtor.name }}</p>
+      <p><strong>Address:</strong> {{ debtor.address }}</p>
+      <p><strong>Financial Data Source:</strong> {{ debtor.financial_data_source }}</p>
+      <p><strong>Created At:</strong> {{ debtor.created_at }}</p>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -78,12 +78,14 @@
       </thead>
       <tbody id="debtorsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         {% for debtor in debtors %}
-        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <tr onclick="window.location.href='/debtor/{{ debtor.national_id }}'"
+            class="hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
           <td class="px-6 py-4 whitespace-nowrap">{{ debtor.national_id }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ debtor.name }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ debtor.address }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ debtor.financial_data_source }}</td>
         </tr>
+
         {% endfor %}
       </tbody>
     </table>
@@ -118,13 +120,18 @@ async function fetchDebtors(query) {
     // Populate table
     data.forEach(d => {
         const row = document.createElement('tr');
-        row.className = "hover:bg-gray-100 dark:hover:bg-gray-700 transition";
+        row.className = "hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer";
+        row.tabIndex = 0; // allow keyboard focus
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">${d.national_id}</td>
             <td class="px-6 py-4 whitespace-nowrap">${d.name}</td>
             <td class="px-6 py-4 whitespace-nowrap">${d.address}</td>
             <td class="px-6 py-4 whitespace-nowrap">${d.financial_data_source}</td>
         `;
+        // redirect to debtor detail on click or Enter
+        row.addEventListener('click', () => window.location.href = `/debtor/${d.national_id}`);
+        row.addEventListener('keydown', (e) => { if (e.key === 'Enter') row.click(); });
+
         tbody.appendChild(row);
     });
 }
