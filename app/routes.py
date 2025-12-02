@@ -23,7 +23,6 @@ def login():
     return render_template("index.html", error_message=error_message)
 
 def log_access(username, action, resource_type, resource_id, details=None):
-    print("LOGGING →", username, action, resource_type, resource_id)
 
     entry = AuditLog(
         username=username,
@@ -181,3 +180,24 @@ def debtor_detail(national_id):
     )
 
     return render_template("debtor_detail.html", debtor=debtor)
+
+@main.route('/delete-debtor/<int:debtor_id>', methods=['POST'])
+def delete_debtor(debtor_id):
+    debtor = Debtor.query.get_or_404(debtor_id)
+    username = session.get('username')
+
+
+    # Log the deletion BEFORE removing, in case you need debtor info
+    log_access(
+        username=username,
+        action="deleted",
+        resource_type="Debtor",
+        resource_id=debtor.national_id,
+        details= f"Name: {debtor.name}, Address: {debtor.address}"
+    )
+
+    db.session.delete(debtor)
+    db.session.commit()
+
+    return redirect(url_for('main.dashboard'))
+

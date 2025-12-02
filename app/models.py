@@ -37,16 +37,13 @@ class AuditLog(db.Model):
 
     # When
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    details = db.Column(db.String)  # Optional additional info
 
-    # Optional details JSON/text
-    details = db.Column(db.Text)
 
 class FinancialData(db.Model):
     __tablename__ = "financial_data"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    debtor_id = db.Column(db.Integer, db.ForeignKey("debtors.national_id"), nullable=False)
+    debtor_id = db.Column(db.Integer, db.ForeignKey("debtors.national_id"), nullable=False, primary_key=True)
     year = db.Column(db.Integer, nullable=False)
     
     assets = db.Column(db.Numeric)
