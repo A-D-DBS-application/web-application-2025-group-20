@@ -1,0 +1,20 @@
+/* Fade-in animation for smooth load */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Table scroll container */
+.table-scroll {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Slight smooth hover */
+tbody tr {
+  transition: background-color 0.2s ease;
+}

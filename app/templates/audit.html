@@ -4,23 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audit Log</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/audit.css') }}">
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-100">
 
-<header class="sticky top-0 bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center">
+<header class="sticky top-0 bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center fade-in-up">
     <h1 class="text-xl">Audit Log</h1>
     <a href="{{ url_for('main.dashboard') }}"
-       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-xl">Back</a>
+       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-xl transition">
+       Back
+    </a>
 </header>
 
-<main class="container mx-auto mt-10 px-4">
+<main class="container mx-auto mt-10 px-4 fade-in-up">
+
     <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6">
         <h2 class="text-2xl font-semibold mb-4">System Audit Records</h2>
 
         {% if logs %}
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto table-scroll">
             <table class="min-w-full divide-y divide-gray-700">
                 <thead class="bg-gray-700">
                     <tr>
@@ -29,16 +36,18 @@
                         <th class="px-6 py-3">Resource Type</th>
                         <th class="px-6 py-3">Resource ID</th>
                         <th class="px-6 py-3">Timestamp</th>
+                        <th class="px-6 py-3">Details</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-600">
                     {% for log in logs %}
-                    <tr class="hover:bg-gray-700">
+                    <tr class="hover:bg-gray-700 transition">
                         <td class="px-6 py-2">{{ log.username }}</td>
                         <td class="px-6 py-2">{{ log.action }}</td>
                         <td class="px-6 py-2">{{ log.resource_type }}</td>
                         <td class="px-6 py-2">{{ log.resource_id }}</td>
                         <td class="px-6 py-2">{{ log.timestamp }}</td>
+                        <td class="px-6 py-2">{{ log.details }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -48,6 +57,7 @@
         <p class="text-center text-gray-400">No audit records found.</p>
         {% endif %}
     </div>
+
 </main>
 
 </body>
