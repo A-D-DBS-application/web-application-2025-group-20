@@ -4,12 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Debtor Details | Solv.io</title>
-
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/debtor_detail.css') }}">
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
@@ -19,8 +14,8 @@
      ← Back to Dashboard
   </a>
 
-  <div class="details-card">
-    <h1 class="title">Debtor Overview</h1>
+  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Debtor Overview</h1>
 
     <div class="space-y-3">
       <p><strong>National ID:</strong> {{ debtor.national_id }}</p>
