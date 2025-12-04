@@ -1,9 +1,9 @@
-from flask import Blueprint, request, redirect, url_for, render_template, session
+from flask import Blueprint, request, redirect, url_for, render_template, session, flash, abort
 from app.models import db, User, Debtor, AuditLog
 from datetime import datetime
 from sqlalchemy import text, select
+from sqlalchemy.exc import IntegrityError
 main = Blueprint('main', __name__)
-
 
 @main.route("/", methods=["GET", "POST"])
 def login():
@@ -18,9 +18,10 @@ def login():
             session["role"] = user.role
             return redirect(url_for("main.dashboard"))
         else:
-            error_message = "Please enter a valid username."
+            error_message = "Wrong username. Please try again."
 
     return render_template("index.html", error_message=error_message)
+
 
 def log_access(username, action, resource_type, resource_id, details=None):
 
@@ -121,40 +122,40 @@ def api_debtors():
         for d in debtors
     ])
 
-@main.route("/add-debtor", methods=["GET"])
-def add_debtor_page():
+@main.route("/add-debtor", methods=["GET", "POST"])
+def add_debtor():
     username = session.get("username")
     if not username:
         return redirect(url_for("main.login"))
 
-    return render_template("add_debtor.html")
+    error_message = None
 
-@main.route("/add-debtor", methods=["POST"])
-def add_debtor_submit():
-    username = session.get("username")
-    if not username:
-        return redirect(url_for("main.login"))
+    if request.method == "POST":
+        national_id = request.form.get("national_id")
+        name = request.form.get("name")
+        address = request.form.get("address")
+        source = request.form.get("financial_data_source")
 
-    national_id = request.form.get("national_id")
-    name = request.form.get("name")
-    address = request.form.get("address")
-    source = request.form.get("financial_data_source")
+        new_debtor = Debtor(
+            national_id=national_id,
+            name=name,
+            address=address,
+            financial_data_source=source,
+            user_username=username
+        )
 
-    new_debtor = Debtor(
-        national_id=national_id,
-        name=name,
-        address=address,
-        financial_data_source=source,
-        user_username=username
-    )
+        try:
+            db.session.add(new_debtor)
+            db.session.commit()
+            # optional logging
+            log_access(username, "created", "Debtor", national_id)
+            flash("Debtor added successfully!", "success")
+            return redirect(url_for("main.dashboard"))
+        except IntegrityError:
+            db.session.rollback()
+            error_message = f"Debtor with National ID {national_id} already exists."
 
-    db.session.add(new_debtor)
-    db.session.commit()
-
-    # optional logging
-    log_access(username, "created", "Debtor", national_id)
-
-    return redirect(url_for("main.dashboard"))
+    return render_template("add_debtor.html", error_message=error_message)
 
 @main.route("/debtor/<int:national_id>")
 def debtor_detail(national_id):
@@ -201,3 +202,101 @@ def delete_debtor(debtor_id):
 
     return redirect(url_for('main.dashboard'))
 
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    from app import db
+    if request.method == 'POST':
+        username = request.form.get('username').strip()
+
+        if not username:
+            flash("Please enter a username.", "error")
+            return redirect(url_for('main.register'))
+
+        # Check if the user already exists
+        existing = User.query.filter_by(username=username).first()
+        if existing:
+            flash("Username already exists.", "error")
+            return redirect(url_for('main.register'))
+
+        # Create new user with bailiff role
+        new_user = User(username=username, role="bailiff")
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Account created successfully! You can now log in.", "success")
+        return redirect(url_for('main.login'))
+
+    return render_template('register.html')
+
+def admin_only():
+    """Simple helper: return username of admin or abort(403)."""
+    username = session.get("username")
+    if not username:
+        return None
+    user = User.query.filter_by(username=username).first()
+    if not user or user.role != "admin":
+        abort(403)
+    return user
+
+@main.route("/manage-users")
+def manage_users():
+    # Only admins allowed
+    admin = admin_only()
+    # if admin_only aborted, execution stops; otherwise continue
+    users = User.query.order_by(User.username).all()
+    return render_template("manage_users.html", users=users, current_username=admin.username)
+
+@main.route("/upgrade-user/<string:target_username>", methods=["POST"])
+def upgrade_user(target_username):
+    admin = admin_only()
+    target = User.query.filter_by(username=target_username).first_or_404()
+
+    if target.role == "admin":
+        flash("User is already an admin.", "error")
+        return redirect(url_for("main.manage_users"))
+
+    target.role = "admin"
+    db.session.commit()
+
+    # Audit log: who performed the action is admin.username
+    log_access(
+        username=admin.username,
+        action="upgrade_user",
+        resource_type="User",
+        resource_id=target.username,
+        details=f"Upgraded {target.username} to admin"
+    )
+
+    flash(f"{target.username} is now an admin!", "success")
+    return redirect(url_for("main.manage_users"))
+
+@main.route("/delete-user/<string:target_username>", methods=["POST"])
+def delete_user(target_username):
+    admin = admin_only()
+    target = User.query.filter_by(username=target_username).first_or_404()
+
+    # Prevent deleting yourself
+    if target.username == admin.username:
+        flash("You cannot delete your own account.", "error")
+        return redirect(url_for("main.manage_users"))
+
+    # Optional: prevent deleting last admin (rough check)
+    if target.role == "admin":
+        admin_count = User.query.filter_by(role="admin").count()
+        if admin_count <= 1:
+            flash("Cannot delete the last admin.", "error")
+            return redirect(url_for("main.manage_users"))
+
+    db.session.delete(target)
+    db.session.commit()
+
+    log_access(
+        username=admin.username,
+        action="delete_user",
+        resource_type="User",
+        resource_id=target.username,
+        details=f"Deleted user {target.username} (role={target.role})"
+    )
+
+    flash("User deleted successfully.", "success")
+    return redirect(url_for("main.manage_users"))

@@ -1,0 +1,24 @@
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* --- TABLE SCROLL --- */
+.table-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* --- BUTTON TRANSITIONS --- */
+button, a {
+  transition: all 0.2s ease;
+}
+
+#clearSearch {
+    transition: all 0.2s ease;
+}
