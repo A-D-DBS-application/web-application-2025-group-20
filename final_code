@@ -1,0 +1,27 @@
+import requests
+
+jwt_token = "eyJhbGciOiJSUzI1NiJ9.eyJ0ZWFtIjoxNTM5OTY1MTk3LCJpYXQiOjE3NjQ4NjEzODMsImlzcyI6ImJpenp5OnB1YmxpYy1hcGkiLCJzdWIiOiIxNTM5OTY1MTk3In0.U34ClDcN5YZzDbkNSxQlGcLLvfn-V0m8iAh-fJwMiml2FQpo9nb9elgxoA7Qg5yn6VDopyq9tqTUk-ezTjrn-m-ixJLxe4CHKMuRDk2sgo5jBLWrxQgTLwFqLKQyxraUcJnVYh6nI8l11nLZT-X2-p0Z1gf6LP1HWs1Y0SWlfd6-Ci8qro7wyAQSplj22KiJ2Aphmm695elV8A4Wii4DIG2AgWB_goXfbs0fWoAh4aQLZxgOsdkyo4IbQNP-SAdHb2J_CYaGqsqkF6amxSfGT8Y-OJOZaT-zqLbmMy6p5c-vAG9HkusypDoToNg5bUpl84bPKEWNystRoUSimnTgyA"
+url = "https://api.bizzy.ai/v1/companies/BE/"
+
+def getData(bedrijfsnummer):
+
+    headers = {
+        "Authorization": f"Bearer {jwt_token}",
+        "Accept": "application/json"
+    }
+
+    response = requests.get(url + bedrijfsnummer + "/financials", headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        print("Financiële gegevens:", data)
+    else:
+        print(f"Fout bij ophalen van data: {response.status_code}")
+        print(response.text)
+
+if __name__ == "__main__":
+    bedrijfsnummer = str(input("Bedrijfsnummer: "))
+    x = getData(bedrijfsnummer)
+    print(x)
+
+# nog mooi printen en ratios => zoeken uit het json bestand (er staat per variabele per jaar de gegevens, class maken, linken aan website
