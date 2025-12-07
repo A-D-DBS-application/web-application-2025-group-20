@@ -15,12 +15,9 @@ def getData(bedrijfsnummer) -> str:
 
     response = requests.get(url + bedrijfsnummer + "/financials", headers=headers)
 
-    if response.status_code == 200:
-        data = response.json()
-    else:
-        print(f"\nFout bij ophalen van data: {response.status_code}")
-        print(response.text)
-    return data
+    if response.status_code != 200:
+        raise Exception(response.status_code, response.text)
+    return response.json()
 
 def clean_vat_number(raw: str) -> str:
 
@@ -71,39 +68,6 @@ class AnnualAccount:
     female_ratio: float
 
     def pretty_print(self):
-#        print(f"\n--- Annual Account {self.year} ---")
-#        print(f"Health Indicator: {self.health_indicator}")
-
-#        print("\nProfitability:")
-#        print(f"  Revenue: {self.revenue}")
- #       print(f"  Gross Margin: {self.gross_margin}")
-  #      print(f"  EBITDA: {self.ebitda}")
-   #     print(f"  EBIT: {self.ebit}")
-    #    print(f"  Net Profit: {self.net_profit}")
-#
- #       print("\nLiquidity:")
-  #      print(f"  Cash: {self.cash}")
-   #     print(f"  Cash Flow: {self.cash_flow}")
-    #    print(f"  Net Working Capital: {self.nwc}")
-     #   print(f"  Net Working Capital Requirement: {self.nwcr}")
-      #  print(f"  Current Ratio: {self.current_ratio}")
-       # print(f"  Quick Ratio: {self.quick_ratio}")
-
-#        print("\nSolvency:")
- #       print(f"  Total Assets: {self.total_assets}")
-  #      print(f"  Equity: {self.equity}")
-   #     print(f"  Capital: {self.capital}")
-    #    print(f"  Retained Earnings: {self.retained_earnings}")
-     #   print(f"  Debt: {self.debt}")
-      #  print(f"  Long Term Debt: {self.long_term_debt}")
-       # print(f"  Short Term Debt: {self.short_term_debt}")
-
-#        print("\nPeople:")
- #       print(f"  Employees: {self.employees}")
-  #      print(f"  New Hires: {self.new_hires}")
-   #     print(f"  Male Ratio: {self.male_ratio}")
-    #    print(f"  Female Ratio: {self.female_ratio}")
-
         print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")
         print("-------------------------------")
 
@@ -168,13 +132,15 @@ if __name__ == "__main__":
         except ValueError as e:
             print(f"\nOngeldig BTW-nummer ({raw}): {e}")
             continue
+
+        data = getData(nummer)
+
         try:
-            data = getData(nummer)
-        except Exception as e:
-            print(f"\nKon data niet ophalen voor {nummer}: {e}")
+            company_name = data.get("identifier", {}).get("name", nummer)
+            accounts = parse_financials_to_classes(data)
+        except AttributeError as e:
+            print(f"\nKon data niet ophalen voor {nummer}")
             continue
-        accounts = parse_financials_to_classes(data)
-        company_name = data.get("identifier", {}).get("name", nummer)
 
         if not accounts:
             print(f"\nGeen financiële gegevens gevonden voor {company_name}.")
@@ -182,6 +148,5 @@ if __name__ == "__main__":
             print(f"\nFinanciële gegevens voor {company_name}:")
             for acc in sorted(accounts, key=lambda x: x.year, reverse=True):
                 acc.pretty_print()
-
 
 #testnummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
