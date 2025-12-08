@@ -67,8 +67,71 @@ class AnnualAccount:
     male_ratio: float
     female_ratio: float
 
+    SOLVENCY_RANGES = {
+        "cf_coverage": (0, 3, False),        # hoger = beter
+        "net_leverage": (0, 6, True),        # lager = beter
+        "lt_independence": (0, 0.6, False),  # hoger = beter
+        "ebitda_mult": (0, 10, True),        # lager = beter
+        "current_ratio": (0, 3, False),      # hoger = beter
+        "quick_ratio": (0, 2.5, False),      # hoger = beter
+    }
+
+    SOLVENCY_WEIGHTS = {
+        "cf_coverage": 0.18,
+        "net_leverage": 0.23,
+        "lt_independence": 0.28,
+        "ebitda_mult": 0.14,
+        "current_ratio": 0.09,
+        "quick_ratio": 0.08,
+    }
+    @staticmethod
+    def normalize(value, min_val, max_val, inverse=False):
+        """Normaliseer indicatoren naar schaal 0–1."""
+        if value is None:
+            return 0.0
+        if value < min_val:
+            value = min_val
+        if value > max_val:
+            value = max_val
+
+        norm = (value - min_val) / (max_val - min_val)
+        return 1 - norm if inverse else norm
+    
+    def compute_model_solvency(self) -> float:
+        cf_coverage = (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
+        net_leverage = (self.debt - self.cash) / self.equity if self.equity else 0.0
+        lt_independence = self.equity / (self.long_term_debt + self.equity) if (self.long_term_debt + self.equity) else 0.0
+        ebitda_mult = self.debt / self.ebitda if self.ebitda else 0.0
+
+        cr = self.current_ratio or 0.0
+        qr = self.quick_ratio or 0.0
+
+        cf_norm = self.normalize(cf_coverage, *self.SOLVENCY_RANGES["cf_coverage"])
+        nl_norm = self.normalize(net_leverage, *self.SOLVENCY_RANGES["net_leverage"])
+        lt_norm = self.normalize(lt_independence, *self.SOLVENCY_RANGES["lt_independence"])
+        em_norm = self.normalize(ebitda_mult, *self.SOLVENCY_RANGES["ebitda_mult"])
+        cr_norm = self.normalize(cr, *self.SOLVENCY_RANGES["current_ratio"])
+        qr_norm = self.normalize(qr, *self.SOLVENCY_RANGES["quick_ratio"])
+
+        score = (
+            cf_norm * self.SOLVENCY_WEIGHTS["cf_coverage"] +
+            nl_norm * self.SOLVENCY_WEIGHTS["net_leverage"] +
+            lt_norm * self.SOLVENCY_WEIGHTS["lt_independence"] +
+            em_norm * self.SOLVENCY_WEIGHTS["ebitda_mult"] +
+            cr_norm * self.SOLVENCY_WEIGHTS["current_ratio"] +
+            qr_norm * self.SOLVENCY_WEIGHTS["quick_ratio"]
+        )
+        return score
+    
     def pretty_print(self):
-        print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")
+        print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")                                   #Graad van eigen vermogen tov totale activa (>) %                 
+        print(f"Dekking van het vreemd vermogen op langetermijn door de cashflow {self.year}: {(self.cash_flow - self.cash)/ self.long_term_debt if self.long_term_debt else 0.0}")                                    #afloscapaciteit van langetermijnschulden met operationele cashflow (>) %
+        print(f"Netto financiele schuldgraad {self.year}: {(self.debt - self.cash) / self.equity if self.equity else 0.0}")                                                 #Graad van schulden niet af te betalen met beschikbare liquide middelen (<) x                 
+        print(f"Langetermijngraad van financiele onafhankelijkheid {self.year}: {self.equity / (self.long_term_debt + self.equity) if (self.long_term_debt + self.equity) else 0.0}")                                 #Graad van financiering met eigenvermogen ipv schulden (>) %
+        print(f"EBITDA multiplicator van het netto financieel vreemd vermogen {self.year}: {self.debt / self.ebitda if self.ebitda else 0.0}")                                    #Aantal jaren nodig om de netto financiële schuld af te lossen met de EBITDA (<) x
+        print(f"Current ratio {self.year}: {self.current_ratio}")                                         #Current ratio (>) x
+        print(f"Quick ratio {self.year}: {self.quick_ratio}")                                             #Quick ratio (>) x
+        print(f" Model Solvency Score {self.year}: {self.compute_model_solvency():.4f}")
         print("-------------------------------")
 
 def parse_financials_to_classes(data: dict) -> List[AnnualAccount]:
