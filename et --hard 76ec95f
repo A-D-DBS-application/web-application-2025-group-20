@@ -1,0 +1,23 @@
+[33m7d1890c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: commit: Lokale vooruitgang voordat ik pull
+[33mffcfc43[m HEAD@{1}: reset: moving to origin/main
+[33m76ec95f[m HEAD@{2}: reset: moving to HEAD
+[33m76ec95f[m HEAD@{3}: commit: v
+[33m5230ed1[m HEAD@{4}: commit: oorspronkelijk
+[33m20a2fb9[m HEAD@{5}: commit: oorspronkelijk
+[33mc257b91[m HEAD@{6}: commit: v
+[33mafbf9e9[m HEAD@{7}: commit: Update config.cpython-312.pyc
+[33m7e57e6c[m HEAD@{8}: commit: gitignore en config file aangepast
+[33m2e00b45[m HEAD@{9}: commit: n
+[33mf461ba2[m HEAD@{10}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33mab9746e[m HEAD@{11}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33m0e6e94d[m HEAD@{12}: commit (merge): Merge branch 'main' of https://github.com/A-D-DBS-application/web-application-2025-group-20
+[33mfacd7c1[m HEAD@{13}: commit: /
+[33ma3fcddf[m HEAD@{14}: reset: moving to HEAD
+[33ma3fcddf[m HEAD@{15}: reset: moving to HEAD
+[33ma3fcddf[m HEAD@{16}: reset: moving to HEAD
+[33ma3fcddf[m HEAD@{17}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33m17d4930[m HEAD@{18}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33mea269dd[m HEAD@{19}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33m4be29ca[m HEAD@{20}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33m7a7c9f1[m HEAD@{21}: commit: Update config.py
+[33m05a5c36[m HEAD@{22}: clone: from https://github.com/A-D-DBS-application/web-application-2025-group-20.git
