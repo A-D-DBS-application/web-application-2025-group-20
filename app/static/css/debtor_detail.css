@@ -14,14 +14,29 @@
 .details-card {
     background-color: white;
     color: #1a1a1a;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 1rem;
-    max-width: 700px;
+    max-width: 100%;
     margin: auto;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 
     /* Animation */
     animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Responsive padding */
+@media (min-width: 768px) {
+    .details-card {
+        padding: 2rem;
+        max-width: 700px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .details-card {
+        padding: 2.5rem;
+        max-width: 800px;
+    }
 }
 
 /* Fade-in individual <p> elements (optional stagger) */
@@ -47,7 +62,20 @@
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
+}
+
+/* Responsive title */
+@media (min-width: 768px) {
+    .title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .title {
+        font-size: 2rem;
+    }
 }

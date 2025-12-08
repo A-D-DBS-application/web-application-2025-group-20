@@ -14,10 +14,28 @@
   overflow-y: auto;
 }
 
-/* Optional: make delete button smaller on mobile */
+/* Responsive table improvements */
 @media (max-width: 640px) {
+    .table-scroll {
+        max-height: 400px;
+    }
+    
     .table-scroll td form button {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .table-scroll {
+        max-height: 600px;
+    }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+    .table-scroll {
+        max-height: 700px;
     }
 }

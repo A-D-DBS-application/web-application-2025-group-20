@@ -12,24 +12,26 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/debtor_detail.css') }}">
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 md:p-6 lg:p-8">
 
-  <a href="{{ url_for('main.dashboard') }}"
-     class="text-blue-500 hover:underline mb-4 inline-block">
-     ← Back to Dashboard
-  </a>
+  <div class="container mx-auto max-w-4xl">
+    <a href="{{ url_for('main.dashboard') }}"
+       class="text-blue-500 hover:underline mb-4 md:mb-6 inline-block text-sm md:text-base">
+       ← Back to Dashboard
+    </a>
 
-  <div class="details-card">
-    <h1 class="title">Debtor Overview</h1>
+    <div class="details-card bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 md:p-8 lg:p-10">
+      <h1 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-gray-900 dark:text-gray-100">Debtor Overview</h1>
 
-    <div class="space-y-3">
-      <p><strong>National ID:</strong> {{ debtor.national_id }}</p>
-      <p><strong>Name:</strong> {{ debtor.name }}</p>
-      <p><strong>Address:</strong> {{ debtor.address }}</p>
-      <p><strong>Financial Data Source:</strong> {{ debtor.financial_data_source }}</p>
-      <p><strong>Created At:</strong> {{ debtor.created_at }}</p>
+      <div class="space-y-3 md:space-y-4">
+        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">National ID:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.national_id }}</span></p>
+        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Name:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.name }}</span></p>
+        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Address:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.address }}</span></p>
+        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Financial Data Source:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.financial_data_source }}</span></p>
+        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Created At:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.created_at }}</span></p>
+      </div>
+
     </div>
-
   </div>
 
 </body>
