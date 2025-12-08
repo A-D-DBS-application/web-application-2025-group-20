@@ -68,12 +68,12 @@ class AnnualAccount:
     female_ratio: float
 
     SOLVENCY_RANGES = {
-        "cf_coverage": (0, 3, False),        # hoger = beter
-        "net_leverage": (0, 6, True),        # lager = beter
-        "lt_independence": (0, 0.6, False),  # hoger = beter
-        "ebitda_mult": (0, 10, True),        # lager = beter
-        "current_ratio": (0, 3, False),      # hoger = beter
-        "quick_ratio": (0, 2.5, False),      # hoger = beter
+        "cf_coverage": (0, 3, False),
+        "net_leverage": (0, 6, True),
+        "lt_independence": (0, 0.6, False),
+        "ebitda_mult": (0, 10, True),
+        "current_ratio": (0, 3, False),
+        "quick_ratio": (0, 2.5, False),
     }
 
     SOLVENCY_WEIGHTS = {
@@ -84,9 +84,9 @@ class AnnualAccount:
         "current_ratio": 0.09,
         "quick_ratio": 0.08,
     }
+
     @staticmethod
     def normalize(value, min_val, max_val, inverse=False):
-        """Normaliseer indicatoren naar schaal 0–1."""
         if value is None:
             return 0.0
         if value < min_val:
@@ -96,24 +96,37 @@ class AnnualAccount:
 
         norm = (value - min_val) / (max_val - min_val)
         return 1 - norm if inverse else norm
-    def cf_coverage_ratio(self) -> dict:
-        value = (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
-        return {"year": self.year, "value": value}
 
-    def net_financial_leverage(self) -> dict:
-        value = (self.debt - self.cash) / self.equity if self.equity else 0.0
-        return {"year": self.year, "value": value}
 
-    def long_term_independence(self) -> dict:
+    def cf_coverage_ratio(self) -> float:
+        """Dekking van langetermijnschulden door cashflow."""
+        return (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
+
+    def net_financial_leverage(self) -> float:
+        """Netto financiële schuldgraad."""
+        return (self.debt - self.cash) / self.equity if self.equity else 0.0
+
+    def long_term_independence(self) -> float:
+        """Langetermijngraad van financiële onafhankelijkheid."""
         denom = self.long_term_debt + self.equity
-        value = self.equity / denom if denom else 0.0
-        return {"year": self.year, "value": value}
+        return self.equity / denom if denom else 0.0
 
-    def ebitda_multiplier(self) -> dict:
-        value = self.debt / self.ebitda if self.ebitda else 0.0
-        return {"year": self.year, "value": value}
-    
-    def compute_model_solvency(self) -> dict:
+    def ebitda_multiplier(self) -> float:
+        """EBITDA multiplicator."""
+        return self.debt / self.ebitda if self.ebitda else 0.0
+
+
+    def solvency_indicators(self) -> dict:
+        """Return alle afzonderlijke solvabiliteitsindicatoren in één dict."""
+        return {
+            "cf_coverage": self.cf_coverage_ratio(),
+            "net_financial_leverage": self.net_financial_leverage(),
+            "long_term_independence": self.long_term_independence(),
+            "ebitda_multiplier": self.ebitda_multiplier()
+        }
+
+
+    def compute_model_solvency(self) -> float:
         cf_coverage = (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
         net_leverage = (self.debt - self.cash) / self.equity if self.equity else 0.0
         lt_independence = self.equity / (self.long_term_debt + self.equity) if (self.long_term_debt + self.equity) else 0.0
@@ -137,17 +150,20 @@ class AnnualAccount:
             cr_norm * self.SOLVENCY_WEIGHTS["current_ratio"] +
             qr_norm * self.SOLVENCY_WEIGHTS["quick_ratio"]
         )
-        return {"year": self.year, "value": score}
-    
+        return score
+
+
     def pretty_print(self):
-        print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")                                   #Graad van eigen vermogen tov totale activa (>) %                 
-        print(f"Dekking van het vreemd vermogen op LT door cashflow {self.year}: {self.cf_coverage_ratio()['value']}")
-        print(f"Netto financiële schuldgraad {self.year}: {self.net_financial_leverage()['value']}")
-        print(f"Langetermijngraad financiële onafhankelijkheid {self.year}: {self.long_term_independence()['value']}")
-        print(f"EBITDA multiplicator {self.year}: {self.ebitda_multiplier()['value']}")
+        indicators = self.solvency_indicators()
+
+        print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")
+        print(f"Dekking van het vreemd vermogen op langetermijn door de cashflow {self.year}: {indicators['cf_coverage']}")
+        print(f"Netto financiele schuldgraad {self.year}: {indicators['net_financial_leverage']}")
+        print(f"Langetermijngraad van financiele onafhankelijkheid {self.year}: {indicators['long_term_independence']}")
+        print(f"EBITDA multiplicator van het netto financieel vreemd vermogen {self.year}: {indicators['ebitda_multiplier']}")
         print(f"Current ratio {self.year}: {self.current_ratio}")
         print(f"Quick ratio {self.year}: {self.quick_ratio}")
-        print(f"Model Solvency Score {self.year}: {self.compute_model_solvency()['value']}")
+        print(f"Model Solvency Score {self.year}: {self.compute_model_solvency():.4f}")
         print("-------------------------------")
 
 def parse_financials_to_classes(data: dict) -> List[AnnualAccount]:
