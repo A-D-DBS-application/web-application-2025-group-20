@@ -96,8 +96,24 @@ class AnnualAccount:
 
         norm = (value - min_val) / (max_val - min_val)
         return 1 - norm if inverse else norm
+    def cf_coverage_ratio(self) -> dict:
+        value = (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
+        return {"year": self.year, "value": value}
+
+    def net_financial_leverage(self) -> dict:
+        value = (self.debt - self.cash) / self.equity if self.equity else 0.0
+        return {"year": self.year, "value": value}
+
+    def long_term_independence(self) -> dict:
+        denom = self.long_term_debt + self.equity
+        value = self.equity / denom if denom else 0.0
+        return {"year": self.year, "value": value}
+
+    def ebitda_multiplier(self) -> dict:
+        value = self.debt / self.ebitda if self.ebitda else 0.0
+        return {"year": self.year, "value": value}
     
-    def compute_model_solvency(self) -> float:
+    def compute_model_solvency(self) -> dict:
         cf_coverage = (self.cash_flow - self.cash) / self.long_term_debt if self.long_term_debt else 0.0
         net_leverage = (self.debt - self.cash) / self.equity if self.equity else 0.0
         lt_independence = self.equity / (self.long_term_debt + self.equity) if (self.long_term_debt + self.equity) else 0.0
@@ -121,17 +137,17 @@ class AnnualAccount:
             cr_norm * self.SOLVENCY_WEIGHTS["current_ratio"] +
             qr_norm * self.SOLVENCY_WEIGHTS["quick_ratio"]
         )
-        return score
+        return {"year": self.year, "value": score}
     
     def pretty_print(self):
         print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")                                   #Graad van eigen vermogen tov totale activa (>) %                 
-        print(f"Dekking van het vreemd vermogen op langetermijn door de cashflow {self.year}: {(self.cash_flow - self.cash)/ self.long_term_debt if self.long_term_debt else 0.0}")                                    #afloscapaciteit van langetermijnschulden met operationele cashflow (>) %
-        print(f"Netto financiele schuldgraad {self.year}: {(self.debt - self.cash) / self.equity if self.equity else 0.0}")                                                 #Graad van schulden niet af te betalen met beschikbare liquide middelen (<) x                 
-        print(f"Langetermijngraad van financiele onafhankelijkheid {self.year}: {self.equity / (self.long_term_debt + self.equity) if (self.long_term_debt + self.equity) else 0.0}")                                 #Graad van financiering met eigenvermogen ipv schulden (>) %
-        print(f"EBITDA multiplicator van het netto financieel vreemd vermogen {self.year}: {self.debt / self.ebitda if self.ebitda else 0.0}")                                    #Aantal jaren nodig om de netto financiële schuld af te lossen met de EBITDA (<) x
-        print(f"Current ratio {self.year}: {self.current_ratio}")                                         #Current ratio (>) x
-        print(f"Quick ratio {self.year}: {self.quick_ratio}")                                             #Quick ratio (>) x
-        print(f" Model Solvency Score {self.year}: {self.compute_model_solvency():.4f}")
+        print(f"Dekking van het vreemd vermogen op LT door cashflow {self.year}: {self.cf_coverage_ratio()['value']}")
+        print(f"Netto financiële schuldgraad {self.year}: {self.net_financial_leverage()['value']}")
+        print(f"Langetermijngraad financiële onafhankelijkheid {self.year}: {self.long_term_independence()['value']}")
+        print(f"EBITDA multiplicator {self.year}: {self.ebitda_multiplier()['value']}")
+        print(f"Current ratio {self.year}: {self.current_ratio}")
+        print(f"Quick ratio {self.year}: {self.quick_ratio}")
+        print(f"Model Solvency Score {self.year}: {self.compute_model_solvency()['value']}")
         print("-------------------------------")
 
 def parse_financials_to_classes(data: dict) -> List[AnnualAccount]:
@@ -211,5 +227,7 @@ if __name__ == "__main__":
             print(f"\nFinanciële gegevens voor {company_name}:")
             for acc in sorted(accounts, key=lambda x: x.year, reverse=True):
                 acc.pretty_print()
+
+
 
 #testnummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
