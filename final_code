@@ -212,25 +212,4 @@ if __name__ == "__main__":
             for acc in sorted(accounts, key=lambda x: x.year, reverse=True):
                 acc.pretty_print()
 
-    def Dekking_van_het_vreemd_vermogen_op_langetermijn_door_de_cashflow(self) -> float:
-        if self.long_term_debt == 0:
-            return 0.0
-        return (self.cash_flow - self.cash) / self.long_term_debt
-    
-    def Netto_financiele_schuldgraad(self) -> float:
-        if self.equity == 0:
-            return 0.0
-        return (self.debt - self.cash) / self.equity
-    
-    def Langetermijngraad_van_financiele_onafhankelijkheid(self) -> float:
-        if (self.long_term_debt + self.equity) == 0:
-            return 0.0
-        return self.equity / (self.long_term_debt + self.equity)
-    
-    def EBITDA_multiplicator_van_het_netto_financieel_vreemd_vermogen(self) -> float:
-        if self.ebitda == 0:
-            return 0.0
-        return self.debt / self.ebitda
-    
-print(EBITDA_multiplicator_van_het_netto_financieel_vreemd_vermogen(self))
 #testnummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
