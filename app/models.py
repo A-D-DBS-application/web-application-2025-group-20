@@ -11,6 +11,21 @@ class User(db.Model):
     role = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class FinancialData(db.Model):
+    __tablename__ = "financial_data"
+
+    btw_nummer = db.Column(db.String, nullable=False, primary_key=True)
+    year = db.Column(db.Integer, nullable=False)
+    
+    assets = db.Column(db.Numeric)
+    liabilities = db.Column(db.Numeric)
+    solvability_score = db.Column(db.Float)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Optional: relationship back to debtor
+    debtor = db.relationship("Debtor", backref="financial_records")
+
 
 class Debtor(db.Model):
     __tablename__ = "debtors"
@@ -19,7 +34,7 @@ class Debtor(db.Model):
     name = db.Column(db.String, nullable=False)
     address = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    financial_data_source = db.Column(db.String)
+    btw_nummer = db.Column(db.String, db.ForeignKey("financial_data.btw_nummer"), nullable=False)
     user_username = db.Column(db.String, db.ForeignKey("users.username"))
 
 class AuditLog(db.Model):
@@ -40,17 +55,3 @@ class AuditLog(db.Model):
     details = db.Column(db.String)  # Optional additional info
 
 
-class FinancialData(db.Model):
-    __tablename__ = "financial_data"
-
-    debtor_id = db.Column(db.Integer, db.ForeignKey("debtors.national_id"), nullable=False, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
-    
-    assets = db.Column(db.Numeric)
-    liabilities = db.Column(db.Numeric)
-    solvability_score = db.Column(db.Float)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Optional: relationship back to debtor
-    debtor = db.relationship("Debtor", backref="financial_records")
