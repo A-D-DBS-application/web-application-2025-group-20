@@ -131,29 +131,20 @@ def add_debtor():
     error_message = None
 
     if request.method == "POST":
-        national_id = request.form.get("national_id")
-        name = request.form.get("name")
-        address = request.form.get("address")
-        source = request.form.get("financial_data_source")
+        btw_nummer = request.form.get("btw-nummer")
 
-        new_debtor = Debtor(
-            national_id=national_id,
-            name=name,
-            address=address,
-            financial_data_source=source,
-            user_username=username
-        )
+        #voer algoritme uit
 
-        try:
-            db.session.add(new_debtor)
-            db.session.commit()
+        #try:
+            #db.session.add(new_debtor)
+            #db.session.commit()
             # optional logging
-            log_access(username, "created", "Debtor", national_id)
-            flash("Debtor added successfully!", "success")
-            return redirect(url_for("main.dashboard"))
-        except IntegrityError:
-            db.session.rollback()
-            error_message = f"Debtor with National ID {national_id} already exists."
+            #log_access(username, "created", "Debtor", national_id)
+            #flash("Debtor added successfully!", "success")
+            #return redirect(url_for("main.dashboard"))
+        #except IntegrityError:
+            #db.session.rollback()
+            #error_message = f"Debtor with National ID {national_id} already exists."
 
     return render_template("add_debtor.html", error_message=error_message)
 
