@@ -61,6 +61,16 @@
     </button>
   </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="p-3 rounded-xl mb-4 text-white
+            {% if category == 'error' %} bg-red-600 {% else %} bg-green-600 {% endif %}">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
   <!-- Debtors Table -->
   <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-4 md:p-6 overflow-x-auto table-scroll">

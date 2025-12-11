@@ -13,7 +13,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center min-h-screen text-gray-800 dark:text-gray-100">
@@ -24,15 +24,15 @@
          class="w-36 h-36 object-contain rounded-2xl shadow-md bg-white dark:bg-gray-700 p-4">
   </div>
 
-  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 w-full max-w-sm fade-in-up">
+  <div class="register-card w-full max-w-sm">
 
-    <h2 class="text-2xl font-semibold mb-6 text-center">Create Account</h2>
+    <h2 class="text-2xl font-semibold mb-6 text-center register-title">Create Account</h2>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, msg in messages %}
-          <div class="p-3 rounded-xl mb-4 text-white
+          <div class="p-3 mb-4 text-white flash-box
             {% if category == 'error' %} bg-red-600 {% else %} bg-green-600 {% endif %}">
             {{ msg }}
           </div>
@@ -45,18 +45,18 @@
         type="text"
         name="username"
         placeholder="Choose a username"
-        class="w-full mb-5 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="register-input w-full mb-5 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
       
       <button
         type="submit"
-        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium">
+        class="register-submit w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium">
         Create Account
       </button>
     </form>
 
     <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
       Already have an account?
-      <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline">Log in</a>
+      <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline login-link">Log in</a>
     </p>
 
   </div>

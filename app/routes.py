@@ -1,9 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session, flash, abort
 from app.models import db, User, Debtor, AuditLog, FinancialData
-from datetime import datetime
-from sqlalchemy import text, select
-from sqlalchemy.exc import IntegrityError
-from app.final_code import get_financial_data, clean_vat_number, parse_financials_to_classes, getData, api_get, parse_details, parse_financials
+from sqlalchemy import text
+from app.final_code import clean_vat_number, api_get, parse_details, parse_financials
 from app.ratios import solvabiliteitsscore
 main = Blueprint('main', __name__)
 

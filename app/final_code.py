@@ -1,148 +1,6 @@
 import requests
 import re
 from dataclasses import dataclass
-from typing import Optional, List
-
-jwt_token = "eyJhbGciOiJSUzI1NiJ9.eyJ0ZWFtIjoxNTM5OTY1MTk3LCJpYXQiOjE3NjQ4NjEzODMsImlzcyI6ImJpenp5OnB1YmxpYy1hcGkiLCJzdWIiOiIxNTM5OTY1MTk3In0.U34ClDcN5YZzDbkNSxQlGcLLvfn-V0m8iAh-fJwMiml2FQpo9nb9elgxoA7Qg5yn6VDopyq9tqTUk-ezTjrn-m-ixJLxe4CHKMuRDk2sgo5jBLWrxQgTLwFqLKQyxraUcJnVYh6nI8l11nLZT-X2-p0Z1gf6LP1HWs1Y0SWlfd6-Ci8qro7wyAQSplj22KiJ2Aphmm695elV8A4Wii4DIG2AgWB_goXfbs0fWoAh4aQLZxgOsdkyo4IbQNP-SAdHb2J_CYaGqsqkF6amxSfGT8Y-OJOZaT-zqLbmMy6p5c-vAG9HkusypDoToNg5bUpl84bPKEWNystRoUSimnTgyA"
-url = "https://api.bizzy.ai/v1/companies/BE/"
-
-def getData(bedrijfsnummer) -> str:
-
-    headers = {
-        "Authorization": f"Bearer {jwt_token}",
-        "Accept": "application/json"
-    }
-
-    response = requests.get(url + bedrijfsnummer + "/financials", headers=headers)
-
-    if response.status_code != 200:
-        raise Exception(response.status_code, response.text)
-    return response.json()
-
-def clean_vat_number(raw: str) -> str:
-
-    digits = re.sub(r"\D", "", raw)
-
-    if len(digits) == 10 and digits.startswith("0"):
-        digits = digits[1:]
-
-    if len(digits) != 9:
-        raise ValueError(
-            f"Ongeldig BTW-nummer: verwacht 9 cijfers, kreeg {len(digits)} ({digits})"
-        )
-    return digits
-
-@dataclass
-class AnnualAccount:
-    year: int
-    health_indicator: int
-
-    # Profitability
-    revenue: float
-    gross_margin: float
-    ebitda: float
-    ebit: float
-    net_profit: float
-
-    # Liquidity
-    cash: float
-    cash_flow: float
-    nwc: float
-    nwcr: float
-    current_ratio: float
-    quick_ratio: float
-
-    # Solvency
-    total_assets: float
-    equity: float
-    capital: float
-    retained_earnings: float
-    debt: float
-    long_term_debt: float
-    short_term_debt: float
-
-    # People
-    employees: float
-    new_hires: int
-    male_ratio: float
-    female_ratio: float
-
-    def pretty_print(self):
-        print(f"Solvency ratio {self.year}: {self.equity / self.total_assets if self.total_assets else 0.0}")
-        print("-------------------------------")
-
-    def get(self, field_name: str):
-        return getattr(self, field_name, None)
-    
-def parse_financials_to_classes(data: dict) -> List[AnnualAccount]:
-    accounts = []
-    identifier = data.get("identifier", {})
-    name = identifier.get("name")
-    for item in data.get("data", []):
-        start_date = item.get("startDate")
-        year = int(start_date.split("-")[0]) if start_date else None
-
-        profitability = item.get("profitability", {})
-        liquidity = item.get("liquidity", {})
-        solvency = item.get("solvency", {})
-        people = item.get("people", {})
-
-        accounts.append(
-            AnnualAccount(
-                year=year,
-                health_indicator=item.get("healthIndicator"),
-
-                # Profitability
-                revenue=profitability.get("revenue"),
-                gross_margin=profitability.get("grossMargin"),
-                ebitda=profitability.get("ebitda"),
-                ebit=profitability.get("ebit"),
-                net_profit=profitability.get("netProfit"),
-
-                # Liquidity
-                cash=liquidity.get("cash"),
-                cash_flow=liquidity.get("cashFlow"),
-                nwc=liquidity.get("netWorkingCapital"),
-                nwcr=liquidity.get("netWorkingCapitalRequirement"),
-                current_ratio=liquidity.get("currentRatio"),
-                quick_ratio=liquidity.get("quickRatio"),
-
-                # Solvency
-                total_assets=solvency.get("totalAssets"),
-                equity=solvency.get("equity"),
-                capital=solvency.get("capital"),
-                retained_earnings=solvency.get("retainedEarnings"),
-                debt=solvency.get("debt"),
-                long_term_debt=solvency.get("longTermDebt"),
-                short_term_debt=solvency.get("shortTermDebt"),
-
-                # People
-                employees=people.get("employees"),
-                new_hires=people.get("newHires"),
-                male_ratio=people.get("employeeMaleRatio"),
-                female_ratio=people.get("employeeFemaleRatio"),
-            )
-        )
-
-    return accounts
-
-
-
-#testnummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
-
-
-def get_financial_data(btw_nummer: str) -> Optional[List[AnnualAccount]]:
-    try:
-        data = getData(btw_nummer)
-        return parse_financials_to_classes(data)
-    except Exception as e:
-        print(f"Fout bij ophalen financiële gegevens voor {btw_nummer}: {e}")
-        return None
-    
-
-import requests
-import re
-from dataclasses import dataclass
 from typing import List, Dict, Any
 
 JWT_TOKEN = "eyJhbGciOiJSUzI1NiJ9.eyJ0ZWFtIjoxNTM5OTY1MTk3LCJpYXQiOjE3NjQ4NjEzODMsImlzcyI6ImJpenp5OnB1YmxpYy1hcGkiLCJzdWIiOiIxNTM5OTY1MTk3In0.U34ClDcN5YZzDbkNSxQlGcLLvfn-V0m8iAh-fJwMiml2FQpo9nb9elgxoA7Qg5yn6VDopyq9tqTUk-ezTjrn-m-ixJLxe4CHKMuRDk2sgo5jBLWrxQgTLwFqLKQyxraUcJnVYh6nI8l11nLZT-X2-p0Z1gf6LP1HWs1Y0SWlfd6-Ci8qro7wyAQSplj22KiJ2Aphmm695elV8A4Wii4DIG2AgWB_goXfbs0fWoAh4aQLZxgOsdkyo4IbQNP-SAdHb2J_CYaGqsqkF6amxSfGT8Y-OJOZaT-zqLbmMy6p5c-vAG9HkusypDoToNg5bUpl84bPKEWNystRoUSimnTgyA"  # <-- zet hier je echte token
@@ -338,16 +196,11 @@ def process_vat(nummer: str):
             print(" -", str(acc))
 
 
-#if __name__ == "__main__":
-#    raw_input_string = input("Geef één of meerdere BTW-nummers, gescheiden door komma’s: ")
-#    for nummer in [x.strip() for x in raw_input_string.split(",") if x.strip()]:
-#        process_vat(nummer)
+if __name__ == "__main__":
+    raw_input_string = input("Geef één of meerdere BTW-nummers, gescheiden door komma’s: ")
+    for nummer in [x.strip() for x in raw_input_string.split(",") if x.strip()]:
+        process_vat(nummer)
 
-# Test nummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
+#Test nummers: 0416375270,0403.199.702,BE5,770493071,0123456789,012345678
 
-#nummer = clean_vat_number('BE0467667088')
-#data = api_get(f"{nummer}/financials")
-#details = parse_financials(data)
-#print(details)
-#for account in details:
-#    print(account.year, account.health_indicator)
+
