@@ -13,29 +13,28 @@ class User(db.Model):
 
 class FinancialData(db.Model):
     __tablename__ = "financial_data"
-
-    btw_nummer = db.Column(db.String, nullable=False, primary_key=True)
+    
+    id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
+    btw_nummer = db.Column(db.String, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     
-    assets = db.Column(db.Numeric)
-    liabilities = db.Column(db.Numeric)
-    solvability_score = db.Column(db.Float)
+    current_ratio = db.Column(db.Float)
+    quick_ratio = db.Column(db.Float)
+    schuldgraad = db.Column(db.Float)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Optional: relationship back to debtor
-    debtor = db.relationship("Debtor", backref="financial_records")
 
 
 class Debtor(db.Model):
     __tablename__ = "debtors"
 
-    national_id = db.Column(db.Integer, primary_key=True)
+    national_id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String, nullable=False)
     address = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    btw_nummer = db.Column(db.String, db.ForeignKey("financial_data.btw_nummer"), nullable=False)
+    btw_nummer = db.Column(db.String)
     user_username = db.Column(db.String, db.ForeignKey("users.username"))
+    health_indicator = db.Column(db.String)
 
 class AuditLog(db.Model):
     __tablename__ = "audit_log"

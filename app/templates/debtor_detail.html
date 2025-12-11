@@ -1,38 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debtor Details | Solv.io</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debtor Details | Solv.io</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/debtor_detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/debtor_detail.css') }}">
+    
+    <style>
+    </style>
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 md:p-6 lg:p-8">
 
-  <div class="container mx-auto max-w-4xl">
-    <a href="{{ url_for('main.dashboard') }}"
-       class="text-blue-500 hover:underline mb-4 md:mb-6 inline-block text-sm md:text-base">
-       ← Back to Dashboard
-    </a>
+    <div class="container mx-auto max-w-4xl">
+        <a href="{{ url_for('main.dashboard') }}"
+           class="text-blue-500 hover:underline mb-4 md:mb-6 inline-block text-sm md:text-base">
+            ← Back to Dashboard
+        </a>
 
-    <div class="details-card bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 md:p-8 lg:p-10">
-      <h1 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-gray-900 dark:text-gray-100">Debtor Overview</h1>
+        <div class="details-card bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 md:p-8 lg:p-10 mb-8">
+            <h1 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-gray-900 dark:text-gray-100">Debtor Overview</h1>
 
-      <div class="space-y-3 md:space-y-4">
-        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">National ID:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.national_id }}</span></p>
-        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Name:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.name }}</span></p>
-        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Address:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.address }}</span></p>
-        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Financial Data Source:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.financial_data_source }}</span></p>
-        <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Created At:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.created_at }}</span></p>
-      </div>
+            <div class="space-y-3 md:space-y-4">
+                <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">BTW-nummer:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.btw_nummer }}</span></p> 
+                <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Name:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.name }}</span></p>
+                <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Address:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.address }}</span></p>
+                <p class="text-sm md:text-base lg:text-lg"><strong class="text-gray-700 dark:text-gray-300">Health Indicator:</strong> <span class="text-gray-900 dark:text-gray-100">{{ debtor.health_indicator }}</span></p>
+            </div>
+        </div>
 
+        <div class="details-card bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 md:p-8 lg:p-10">
+            <h2 class="text-xl md:text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">Financial Data History</h2>
+            
+            {% if financial_data %}
+                <div class="p-0 md:p-0 overflow-x-auto table-scroll">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-200 dark:bg-gray-700">
+                            <tr class="text-xs uppercase tracking-wider">
+                                <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Year</th>
+                                <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Current Ratio</th>
+                                <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Quick Ratio</th>
+                                <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Schuldgraad</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for financial in financial_data %} 
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
+                                <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base font-medium text-gray-900 dark:text-gray-100">{{ financial.year }}</td>
+                                
+                                <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base text-right text-gray-900 dark:text-gray-100">
+                                    {{ "{:,.2f}".format(financial.current_ratio | float) }}
+                                </td>
+                                
+                                <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base text-right text-gray-900 dark:text-gray-100">
+                                    {{ "{:,.2f}".format(financial.quick_ratio | float) }}
+                                </td>
+                                <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base text-right text-gray-900 dark:text-gray-100">
+                                    {{ "{:,.2f}".format(financial.schuldgraad | float) }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-base text-gray-500 dark:text-gray-400 italic">No financial data is available for this debtor.</p>
+            {% endif %}
+        </div>
     </div>
-  </div>
 
 </body>
 </html>

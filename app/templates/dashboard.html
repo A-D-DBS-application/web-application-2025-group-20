@@ -67,20 +67,20 @@
     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
       <thead class="bg-gray-200 dark:bg-gray-700">
         <tr>
-          <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">National ID</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">BTW Nummer</th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Name</th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider hidden md:table-cell">Address</th>
-          <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider hidden md:table-cell">Financial Data Source</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider hidden md:table-cell">Health Indicator</th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody id="debtorsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         {% for debtor in debtors %}
         <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
-          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.national_id }}</td>
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.btw_nummer }}</td>
           <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.name }}</td>
           <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base hidden md:table-cell" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.address }}</td>
-          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base hidden md:table-cell" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.financial_data_source }}</td>
+          <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base hidden md:table-cell" onclick="window.location.href='/debtor/{{ debtor.national_id }}'">{{ debtor.health_indicator }}</td>
           <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
             <form action="{{ url_for('main.delete_debtor', debtor_id=debtor.national_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this debtor?');" class="inline">
               <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 md:px-3 py-1 rounded-xl transition text-xs md:text-sm">
