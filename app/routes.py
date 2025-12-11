@@ -99,55 +99,41 @@ from sqlalchemy import or_
 
 @main.route("/api/debtors")
 def api_debtors():
-    """
-    Handles search queries for debtors and returns results in JSON format.
-    Ensures all necessary fields are returned for the JavaScript table to render correctly.
-    """
-    # 1. Authentication Check
     username = session.get("username")
     if not username:
-        # Return a 401 Unauthorized status and an empty list if not logged in
-        return jsonify([]), 401
+        return jsonify([])
 
     search_query = request.args.get("q", "").strip()
 
-    # 2. Base Query (Filtered by logged-in user)
-    # NOTE: Assuming 'Debtor' and 'db' are available in this scope.
+    # Base query filtered by the logged-in user
     query = Debtor.query.filter(Debtor.user_username == username)
 
-    # 3. Apply Search Filter
     if search_query:
         search_pattern = f"%{search_query}%"
-        # Filter across all relevant fields
+        # Filter for the search query across Name, Address, BTW Nummer, and National ID
         query = query.filter(
             or_(
                 Debtor.name.ilike(search_pattern),
                 Debtor.address.ilike(search_pattern),
+                # Added BTW Nummer to search fields
                 Debtor.btw_nummer.ilike(search_pattern), 
-                # Cast national_id to string for partial matching
-                Debtor.national_id.cast(db.String).ilike(search_pattern)
             )
         )
 
-    # 4. Execute Query and Fetch Results
-    debtors = query.all()
+    # Optional: Order the results
+    debtors = query.order_by(Debtor.name).all()
 
-    # 5. Serialize Data for Frontend (CRITICAL FOR TABLE ALIGNMENT)
-    # The keys used here MUST match the fields expected in dashboard.js
-    results = []
-    for debtor in debtors:
-        results.append({
-            "btw_nummer": debtor.btw_nummer,
-            "name": debtor.name,
-            # These two fields MUST be included to ensure the 3rd and 4th table columns align
-            "address": debtor.address,
-            "health_indicator": debtor.health_indicator,
-            # This is needed for the /debtor/ and /delete-debtor/ links
-            "national_id": debtor.national_id 
-        })
-
-    # 6. Return JSON Response
-    return jsonify(results)
+    return jsonify([
+        {
+            "national_id": d.national_id,
+            "name": d.name,
+            "address": d.address,
+            # CRITICAL FIX: Included 'btw_nummer' and 'health_indicator'
+            "btw_nummer": d.btw_nummer, 
+            "health_indicator": d.health_indicator,
+        }
+        for d in debtors
+    ])
 
 def is_btw_connected_to_specific_user(btw_number_to_check, username_to_check):
     # Query the Debtor table, filtering by both BTW number and user_username.
