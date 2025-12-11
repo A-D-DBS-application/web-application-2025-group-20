@@ -92,37 +92,62 @@ def audit_log():
 from flask import jsonify, session, request
 from sqlalchemy import or_
 
+# Assuming your imports include:
+# from flask import jsonify, request, session
+# from your_models import Debtor, db
+# from sqlalchemy import or_
+
 @main.route("/api/debtors")
 def api_debtors():
+    """
+    Handles search queries for debtors and returns results in JSON format.
+    Ensures all necessary fields are returned for the JavaScript table to render correctly.
+    """
+    # 1. Authentication Check
     username = session.get("username")
     if not username:
-        return jsonify([])  # not logged in, return empty
+        # Return a 401 Unauthorized status and an empty list if not logged in
+        return jsonify([]), 401
 
     search_query = request.args.get("q", "").strip()
 
+    # 2. Base Query (Filtered by logged-in user)
+    # NOTE: Assuming 'Debtor' and 'db' are available in this scope.
     query = Debtor.query.filter(Debtor.user_username == username)
 
+    # 3. Apply Search Filter
     if search_query:
+        search_pattern = f"%{search_query}%"
+        # Filter across all relevant fields
         query = query.filter(
             or_(
-                Debtor.name.ilike(f"%{search_query}%"),
-                Debtor.address.ilike(f"%{search_query}%"),
-                Debtor.national_id.cast(db.String).ilike(f"%{search_query}%")
+                Debtor.name.ilike(search_pattern),
+                Debtor.address.ilike(search_pattern),
+                Debtor.btw_nummer.ilike(search_pattern), 
+                # Cast national_id to string for partial matching
+                Debtor.national_id.cast(db.String).ilike(search_pattern)
             )
         )
 
+    # 4. Execute Query and Fetch Results
     debtors = query.all()
 
-    return jsonify([
-        {
-            "national_id": d.national_id,
-            "name": d.name,
-            "address": d.address,
-            "created_at": d.created_at.strftime("%Y-%m-%d %H:%M:%S") if d.created_at else "",
-            "financial_data_source": d.financial_data_source
-        }
-        for d in debtors
-    ])
+    # 5. Serialize Data for Frontend (CRITICAL FOR TABLE ALIGNMENT)
+    # The keys used here MUST match the fields expected in dashboard.js
+    results = []
+    for debtor in debtors:
+        results.append({
+            "btw_nummer": debtor.btw_nummer,
+            "name": debtor.name,
+            # These two fields MUST be included to ensure the 3rd and 4th table columns align
+            "address": debtor.address,
+            "health_indicator": debtor.health_indicator,
+            # This is needed for the /debtor/ and /delete-debtor/ links
+            "national_id": debtor.national_id 
+        })
+
+    # 6. Return JSON Response
+    return jsonify(results)
 
 def is_btw_connected_to_specific_user(btw_number_to_check, username_to_check):
     # Query the Debtor table, filtering by both BTW number and user_username.
@@ -157,7 +182,7 @@ def add_debtor():
         try:
             nummer = clean_vat_number(btw_nummer)
         except ValueError as e:
-            flash(f"Ongeldig BTW-nummer ({btw_nummer}): {e}", "error")
+            flash(f"Ongeldig BTW-nummer ({btw_nummer})", "error")
             return redirect(url_for("main.add_debtor"))
 
         if is_btw_connected_to_specific_user(format_btw_number(nummer), username):

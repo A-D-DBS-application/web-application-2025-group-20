@@ -1,10 +1,8 @@
-def cf_coverage_ratio(self) -> float:
+def dekking_cf_vv(cf, vv) -> float:
         """Dekking van langetermijnschulden door cashflow."""
-        score = (self.cash_flow - self.cash) / self.long_term_debt
-        if self.long_term_debt:
-            return score
-        else:
-            return 0.0
+        score = cf / vv
+        
+        return score
 
 def net_financial_leverage(self) -> float:
     """Netto financiële schuldgraad."""

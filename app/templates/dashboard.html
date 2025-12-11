@@ -70,7 +70,16 @@
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">BTW Nummer</th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Name</th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider hidden md:table-cell">Address</th>
-          <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider hidden md:table-cell">Health Indicator</th>
+          <th id="healthSortHeader" class="table-cell-base font-medium uppercase tracking-wider text-left cursor-pointer hidden md:table-cell">
+                <div class="flex items-center justify-between">
+                    Health Indicator
+                    <span id="sortIndicator" class="ml-1 text-gray-500 dark:text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 10.707a1 1 0 01-1.414 0L10 7.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </div>
+            </th>
           <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
