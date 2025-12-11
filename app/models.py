@@ -20,7 +20,7 @@ class FinancialData(db.Model):
     
     current_ratio = db.Column(db.Float)
     quick_ratio = db.Column(db.Float)
-    schuldgraad = db.Column(db.Float)
+    solvabiliteitsscore = db.Column(db.Float)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -46,7 +46,6 @@ class AuditLog(db.Model):
     action = db.Column(db.String, nullable=False)  # e.g. "viewed", "exported", "updated"
 
     # What data was accessed
-    resource_type = db.Column(db.String, nullable=False)  # e.g. "Debtor"
     resource_id = db.Column(db.String, nullable=False)     # e.g. national_id
 
     # When

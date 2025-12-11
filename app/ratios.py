@@ -30,6 +30,6 @@ def ebitda_multiplier(self) -> float:
     else:
         return 0.0
     
-def schuldgraad(vv, tv):
-     schuldgraad = vv / tv
-     return schuldgraad
+def solvabiliteitsscore(ev, tv):
+     solvabiliteitsscore = ev / tv
+     return solvabiliteitsscore

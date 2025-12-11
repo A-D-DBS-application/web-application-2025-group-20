@@ -43,7 +43,7 @@
                                 <th class="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">Year</th>
                                 <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Current Ratio</th>
                                 <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Quick Ratio</th>
-                                <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Schuldgraad</th>
+                                <th class="px-3 md:px-6 py-3 text-right text-xs md:text-sm font-medium uppercase tracking-wider">Solvability</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -59,7 +59,7 @@
                                     {{ "{:,.2f}".format(financial.quick_ratio | float) }}
                                 </td>
                                 <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base text-right text-gray-900 dark:text-gray-100">
-                                    {{ "{:,.2f}".format(financial.schuldgraad | float) }}
+                                    {{ "{:,.2f}".format(financial.solvabiliteitsscore | float) }}
                                 </td>
                             </tr>
                             {% endfor %}

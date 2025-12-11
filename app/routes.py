@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import text, select
 from sqlalchemy.exc import IntegrityError
 from app.final_code import get_financial_data, clean_vat_number, parse_financials_to_classes, getData, api_get, parse_details, parse_financials
-from app.ratios import schuldgraad
+from app.ratios import solvabiliteitsscore
 main = Blueprint('main', __name__)
 
 @main.route("/", methods=["GET", "POST"])
@@ -25,12 +25,11 @@ def login():
     return render_template("index.html", error_message=error_message)
 
 
-def log_access(username, action, resource_type, resource_id, details=None):
+def log_access(username, action, resource_id, details=None):
 
     entry = AuditLog(
         username=username,
         action=action,
-        resource_type=resource_type,
         resource_id=str(resource_id),
         details=details
     )
@@ -51,8 +50,7 @@ def dashboard():
     # Log that the user accessed their debtor list
     log_access(
         username=username,
-        action="viewed list",
-        resource_type="Debtor",
+        action="viewed dashboard",
         resource_id="ALL"
     )
 
@@ -203,7 +201,7 @@ def add_debtor():
                         year=year,
                         current_ratio=account.current_ratio,
                         quick_ratio=account.quick_ratio,
-                        schuldgraad=schuldgraad(account.debt, account.total_assets)
+                        solvabiliteitsscore=solvabiliteitsscore(account.equity, account.total_assets)
                     )
                     db.session.add(new_financial)        
 
@@ -231,7 +229,7 @@ def add_debtor():
 
 
             db.session.commit()
-            log_access(username, "created", "Debtor", format_btw_number(nummer))
+            log_access(username, "created debtor", format_btw_number(nummer))
             flash("Debtor added successfully!", "success")
             return redirect(url_for("main.dashboard"))
 
@@ -266,8 +264,7 @@ def debtor_detail(national_id):
     log_access(
         username=username,
         action="viewed detail",
-        resource_type="Debtor",
-        resource_id=national_id
+        resource_id= btw_nummer
     )
 
     return render_template(
@@ -285,9 +282,8 @@ def delete_debtor(debtor_id):
     # Log the deletion BEFORE removing, in case you need debtor info
     log_access(
         username=username,
-        action="deleted",
-        resource_type="Debtor",
-        resource_id=debtor.national_id,
+        action="deleted debtor",
+        resource_id=debtor.btw_nummer,
         details= f"Name: {debtor.name}, Address: {debtor.address}"
     )
 
