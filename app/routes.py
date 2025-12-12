@@ -66,15 +66,6 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-@main.route("/dbtest")
-def dbtest():
-    try:
-        db.session.execute(text("SELECT 1;"))
-        return "DB connection OK!"
-    except Exception as e:
-        return str(e)
-
-
 @main.route("/audit")
 def audit_log():
     if session.get("role") != "admin":
