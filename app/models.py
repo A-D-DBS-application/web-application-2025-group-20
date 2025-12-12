@@ -50,4 +50,3 @@ class AuditLog(db.Model):
 
     # When
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    details = db.Column(db.String)  # Optional additional info

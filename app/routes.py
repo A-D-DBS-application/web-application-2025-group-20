@@ -23,13 +23,12 @@ def login():
     return render_template("index.html", error_message=error_message)
 
 
-def log_access(username, action, resource_id, details=None):
+def log_access(username, action, resource_id):
 
     entry = AuditLog(
         username=username,
         action=action,
         resource_id=str(resource_id),
-        details=details
     )
 
     db.session.add(entry)
@@ -282,7 +281,6 @@ def delete_debtor(debtor_id):
         username=username,
         action="deleted debtor",
         resource_id=debtor.btw_nummer,
-        details= f"Name: {debtor.name}, Address: {debtor.address}"
     )
 
     db.session.delete(debtor)
@@ -310,6 +308,7 @@ def register():
         new_user = User(username=username, role="bailiff")
         db.session.add(new_user)
         db.session.commit()
+        log_access(username=username, action="registered account", resource_id=username)
 
         flash("Account created successfully! You can now log in.", "success")
         return redirect(url_for('main.login'))
@@ -349,10 +348,8 @@ def upgrade_user(target_username):
     # Audit log: who performed the action is admin.username
     log_access(
         username=admin.username,
-        action="upgrade_user",
-        resource_type="User",
+        action="upgraded user",
         resource_id=target.username,
-        details=f"Upgraded {target.username} to admin"
     )
 
     flash(f"{target.username} is now an admin!", "success")
@@ -380,10 +377,8 @@ def delete_user(target_username):
 
     log_access(
         username=admin.username,
-        action="delete_user",
-        resource_type="User",
+        action="deleted user",
         resource_id=target.username,
-        details=f"Deleted user {target.username} (role={target.role})"
     )
 
     flash("User deleted successfully.", "success")
