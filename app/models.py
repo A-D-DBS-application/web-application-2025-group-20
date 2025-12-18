@@ -14,9 +14,8 @@ class User(db.Model):
 class FinancialData(db.Model):
     __tablename__ = "financial_data"
     
-    id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
-    btw_nummer = db.Column(db.String, nullable=False)
-    year = db.Column(db.Integer, nullable=False)
+    btw_nummer = db.Column(db.String, nullable=False, primary_key=True)
+    year = db.Column(db.Integer, nullable=False, primary_key=True)
     
     current_ratio = db.Column(db.Float)
     quick_ratio = db.Column(db.Float)
