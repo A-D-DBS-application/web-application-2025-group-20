@@ -1,38 +1,47 @@
+-- 1. Users
 CREATE TABLE users (
-    username TEXT PRIMARY KEY,
-    role TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    username text NOT NULL,
+    role text,
+    created_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT users_pkey PRIMARY KEY (username)
 );
+
+-- 2. Debtors
 CREATE TABLE debtors (
-    national_id BIGINT PRIMARY KEY,
-    name TEXT NOT NULL,
-    address TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    financial_data_source TEXT,
-    user_username TEXT REFERENCES users(username)
-);
-CREATE TABLE audit_log (
-    id SERIAL PRIMARY KEY,
-    username TEXT NOT NULL REFERENCES users(username),
-
-    action TEXT NOT NULL,
-    resource_type TEXT NOT NULL,
-    resource_id TEXT NOT NULL,
-
-    timestamp TIMESTAMP DEFAULT NOW(),
-    details TEXT
+    national_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name text,
+    address text,
+    btw_nummer text,
+    health_indicator text,
+    created_at timestamp with time zone DEFAULT now(),
+    user_username text,
+    CONSTRAINT debtors_pkey PRIMARY KEY (national_id),
+    CONSTRAINT debtors_user_username_fkey FOREIGN KEY (user_username)
+        REFERENCES users (username)
 );
 
+-- 3. Financial Data
+-- Zonder FK, alleen PK op btw + jaar
 CREATE TABLE financial_data (
-    id BIGSERIAL PRIMARY KEY,
-    debtor_id BIGINT REFERENCES debtors(national_id),
-    year INT NOT NULL,
+    btw_nummer text NOT NULL,
+    year integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    current_ratio real,
+    quick_ratio real,
+    solvabiliteitsscore real,
+    CONSTRAINT financial_data_pkey PRIMARY KEY (btw_nummer, year)
+);
 
-    assets NUMERIC,
-    liabilities NUMERIC,
-    solvability_score DOUBLE PRECISION,
-
-    created_at TIMESTAMPTZ DEFAULT NOW()
+-- 4. Audit Log
+CREATE TABLE audit_log (
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
+    action text,
+    resource_id text,
+    username text,
+    "timestamp" timestamp with time zone DEFAULT now(),
+    CONSTRAINT audit_log_pkey PRIMARY KEY (id),
+    CONSTRAINT audit_log_username_fkey FOREIGN KEY (username)
+        REFERENCES users (username)
 );
 
 
