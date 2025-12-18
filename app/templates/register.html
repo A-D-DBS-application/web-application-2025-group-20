@@ -12,8 +12,21 @@
       document.documentElement.classList.add('dark');
     }
   </script>
+    <!-- Standard favicon -->
+  <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <!-- High-res icons for Android / PWA -->
+  <link rel="icon" type="image/png" sizes="192x192" href="static/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="static/favicon-512x512.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+
+  <!-- ICO for legacy Windows / older browsers -->
+  <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center min-h-screen text-gray-800 dark:text-gray-100">
@@ -24,15 +37,15 @@
          class="w-36 h-36 object-contain rounded-2xl shadow-md bg-white dark:bg-gray-700 p-4">
   </div>
 
-  <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 w-full max-w-sm fade-in-up">
+  <div class="register-card w-full max-w-sm">
 
-    <h2 class="text-2xl font-semibold mb-6 text-center">Create Account</h2>
+    <h2 class="text-2xl font-semibold mb-6 text-center register-title">Create Account</h2>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, msg in messages %}
-          <div class="p-3 rounded-xl mb-4 text-white
+          <div class="p-3 mb-4 text-white flash-box
             {% if category == 'error' %} bg-red-600 {% else %} bg-green-600 {% endif %}">
             {{ msg }}
           </div>
@@ -45,18 +58,18 @@
         type="text"
         name="username"
         placeholder="Choose a username"
-        class="w-full mb-5 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="register-input w-full mb-5 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
       
       <button
         type="submit"
-        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium">
+        class="register-submit w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium">
         Create Account
       </button>
     </form>
 
     <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-5">
       Already have an account?
-      <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline">Log in</a>
+      <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline login-link">Log in</a>
     </p>
 
   </div>

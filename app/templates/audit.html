@@ -3,12 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audit Log</title>
+  <title>Audit Log | Solv.io</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- External CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/audit.css') }}">
+  <!-- Standard favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
+
+    <!-- High-res icons for Android / PWA -->
+    <link rel="icon" type="image/png" sizes="192x192" href="static/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="static/favicon-512x512.png">
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+
+    <!-- ICO for legacy Windows / older browsers -->
+    <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-100">
@@ -46,10 +60,8 @@
                     <tr>
                         <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider whitespace-nowrap">User</th>
                         <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider whitespace-nowrap">Action</th>
-                        <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider hidden md:table-cell whitespace-nowrap">Resource Type</th>
-                        <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider hidden md:table-cell whitespace-nowrap">Resource ID</th>
+                        <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider hidden md:table-cell whitespace-nowrap">Resource Id</th>
                         <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider whitespace-nowrap">Timestamp</th>
-                        <th class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-left text-xs md:text-sm lg:text-base font-medium uppercase tracking-wider hidden md:table-cell whitespace-nowrap">Details</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-600">
@@ -57,10 +69,8 @@
                     <tr class="hover:bg-gray-700 transition">
                         <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base">{{ log.username }}</td>
                         <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base">{{ log.action }}</td>
-                        <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base hidden md:table-cell">{{ log.resource_type }}</td>
                         <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base hidden md:table-cell">{{ log.resource_id }}</td>
                         <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base whitespace-nowrap">{{ log.timestamp }}</td>
-                        <td class="px-2 md:px-3 lg:px-6 py-2 md:py-3 text-xs md:text-sm lg:text-base hidden md:table-cell">{{ log.details or 'None' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -1,8 +1,8 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session, flash, abort
-from app.models import db, User, Debtor, AuditLog
-from datetime import datetime
-from sqlalchemy import text, select
-from sqlalchemy.exc import IntegrityError
+from app.models import db, User, Debtor, AuditLog, FinancialData
+from sqlalchemy import text
+from app.final_code import clean_vat_number, api_get, parse_details, parse_financials
+from app.ratios import solvabiliteitsscore
 main = Blueprint('main', __name__)
 
 @main.route("/", methods=["GET", "POST"])
@@ -23,14 +23,12 @@ def login():
     return render_template("index.html", error_message=error_message)
 
 
-def log_access(username, action, resource_type, resource_id, details=None):
+def log_access(username, action, resource_id):
 
     entry = AuditLog(
         username=username,
         action=action,
-        resource_type=resource_type,
         resource_id=str(resource_id),
-        details=details
     )
 
     db.session.add(entry)
@@ -49,8 +47,7 @@ def dashboard():
     # Log that the user accessed their debtor list
     log_access(
         username=username,
-        action="viewed list",
-        resource_type="Debtor",
+        action="viewed dashboard",
         resource_id="ALL"
     )
 
@@ -69,15 +66,6 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-@main.route("/dbtest")
-def dbtest():
-    try:
-        db.session.execute(text("SELECT 1;"))
-        return "DB connection OK!"
-    except Exception as e:
-        return str(e)
-
-
 @main.route("/audit")
 def audit_log():
     if session.get("role") != "admin":
@@ -90,37 +78,67 @@ def audit_log():
 from flask import jsonify, session, request
 from sqlalchemy import or_
 
+# Assuming your imports include:
+# from flask import jsonify, request, session
+# from your_models import Debtor, db
+# from sqlalchemy import or_
+
 @main.route("/api/debtors")
 def api_debtors():
     username = session.get("username")
     if not username:
-        return jsonify([])  # not logged in, return empty
+        return jsonify([])
 
     search_query = request.args.get("q", "").strip()
 
+    # Base query filtered by the logged-in user
     query = Debtor.query.filter(Debtor.user_username == username)
 
     if search_query:
+        search_pattern = f"%{search_query}%"
+        # Filter for the search query across Name, Address, BTW Nummer, and National ID
         query = query.filter(
             or_(
-                Debtor.name.ilike(f"%{search_query}%"),
-                Debtor.address.ilike(f"%{search_query}%"),
-                Debtor.national_id.cast(db.String).ilike(f"%{search_query}%")
+                Debtor.name.ilike(search_pattern),
+                Debtor.address.ilike(search_pattern),
+                # Added BTW Nummer to search fields
+                Debtor.btw_nummer.ilike(search_pattern), 
             )
         )
 
-    debtors = query.all()
+    # Optional: Order the results
+    debtors = query.order_by(Debtor.name).all()
 
     return jsonify([
         {
             "national_id": d.national_id,
             "name": d.name,
             "address": d.address,
-            "created_at": d.created_at.strftime("%Y-%m-%d %H:%M:%S") if d.created_at else "",
-            "financial_data_source": d.financial_data_source
+            # CRITICAL FIX: Included 'btw_nummer' and 'health_indicator'
+            "btw_nummer": d.btw_nummer, 
+            "health_indicator": d.health_indicator,
         }
         for d in debtors
     ])
+
+def is_btw_connected_to_specific_user(btw_number_to_check, username_to_check):
+    # Query the Debtor table, filtering by both BTW number and user_username.
+    debtor_exists = db.session.execute(
+        db.select(Debtor).filter_by(
+            btw_nummer=btw_number_to_check,
+            user_username=username_to_check
+        )
+    ).scalar_one_or_none() is not None
+    
+    return debtor_exists
+
+def format_btw_number(nummer: str) -> str:
+    """Format a cleaned BTW number into standard display format."""
+    if len(nummer) == 9:
+        return f"BE0{nummer}"
+    elif len(nummer) == 10:
+        return f"BE{nummer}"
+
 
 @main.route("/add-debtor", methods=["GET", "POST"])
 def add_debtor():
@@ -132,28 +150,86 @@ def add_debtor():
 
     if request.method == "POST":
         btw_nummer = request.form.get("btw-nummer")
+        
+        try:
+            nummer = clean_vat_number(btw_nummer)
+        except ValueError as e:
+            flash(f"Ongeldig BTW-nummer ({btw_nummer})", "error")
+            return redirect(url_for("main.add_debtor"))
 
-        #voer algoritme uit
+        if is_btw_connected_to_specific_user(format_btw_number(nummer), username):
+            flash(f"Het BTW-nummer {btw_nummer} is al gekoppeld aan uw account.", "error")
+            return redirect(url_for("main.add_debtor"))
+        
+        try:
+            financials_raw = api_get(f"{nummer}/financials")
+        except Exception as e:
+            flash(f"\nKon financiële data niet ophalen voor {nummer}", "error")
+            return redirect(url_for("main.add_debtor"))
+        
+        financials = parse_financials(financials_raw)
 
-        #try:
-            #db.session.add(new_debtor)
-            #db.session.commit()
-            # optional logging
-            #log_access(username, "created", "Debtor", national_id)
-            #flash("Debtor added successfully!", "success")
-            #return redirect(url_for("main.dashboard"))
-        #except IntegrityError:
-            #db.session.rollback()
-            #error_message = f"Debtor with National ID {national_id} already exists."
+        if not financials:
+            flash(f"\nGeen financiële gegevens beschikbaar.", "error")
+            return redirect(url_for("main.add_debtor"))
+        else:
+            for account in financials:
+                year = account.get("year")
+                
+                # Check for existing FinancialData record for this BTW and Year
+                financial_exists = FinancialData.query.filter_by(
+                    btw_nummer=format_btw_number(nummer), 
+                    year=year
+                ).first()
+                
+                if not financial_exists:
+                    # Only add the record if it does NOT exist
+                    new_financial = FinancialData(
+                        btw_nummer=format_btw_number(nummer),
+                        year=year,
+                        current_ratio=account.current_ratio,
+                        quick_ratio=account.quick_ratio,
+                        solvabiliteitsscore=solvabiliteitsscore(account.equity, account.total_assets)
+                    )
+                    db.session.add(new_financial)        
+
+        try:
+            details_raw = api_get(f"{nummer}")
+        except Exception as e:
+            debtor = Debtor(
+                address="Onbekend",
+                name="Onbekend",
+                btw_nummer=format_btw_number(nummer),
+                user_username=username,
+                health_indicator = "Onbekend"
+            )
+            db.session.add(debtor)
+        else:
+            details = parse_details(details_raw)
+            debtor = Debtor(
+                address= f"{details.street}, {details.zip_code} {details.city}, {details.country}",
+                name= details.get("name"),
+                btw_nummer=format_btw_number(nummer),
+                user_username=username,
+                health_indicator = financials[0].health_indicator
+            )
+            db.session.add(debtor)
+
+
+            db.session.commit()
+            log_access(username, "created debtor", format_btw_number(nummer))
+            flash("Debtor added successfully!", "success")
+            return redirect(url_for("main.dashboard"))
 
     return render_template("add_debtor.html", error_message=error_message)
 
-@main.route("/debtor/<int:national_id>")
+@main.route("/debtor/<uuid:national_id>")
 def debtor_detail(national_id):
     username = session.get("username")
     if not username:
         return redirect(url_for("main.login"))
 
+    # 1. Fetch the Debtor record
     debtor = Debtor.query.filter_by(national_id=national_id).first()
 
     if not debtor:
@@ -163,17 +239,29 @@ def debtor_detail(national_id):
     if debtor.user_username != username and session.get("role") != "admin":
         return "Forbidden", 403
 
+    # Get the BTW number for filtering
+    btw_nummer = debtor.btw_nummer 
+    
+    financial_records = FinancialData.query.filter_by(btw_nummer=btw_nummer) \
+                                           .order_by(FinancialData.year.desc()) \
+                                           .all()
+
+
+
     # Log access
     log_access(
         username=username,
         action="viewed detail",
-        resource_type="Debtor",
-        resource_id=national_id
+        resource_id= btw_nummer
     )
 
-    return render_template("debtor_detail.html", debtor=debtor)
+    return render_template(
+        "debtor_detail.html", 
+        debtor=debtor, 
+        financial_data=financial_records # This must be the ORM list
+    )
 
-@main.route('/delete-debtor/<int:debtor_id>', methods=['POST'])
+@main.route('/delete-debtor/<uuid:debtor_id>', methods=['POST'])
 def delete_debtor(debtor_id):
     debtor = Debtor.query.get_or_404(debtor_id)
     username = session.get('username')
@@ -182,10 +270,8 @@ def delete_debtor(debtor_id):
     # Log the deletion BEFORE removing, in case you need debtor info
     log_access(
         username=username,
-        action="deleted",
-        resource_type="Debtor",
-        resource_id=debtor.national_id,
-        details= f"Name: {debtor.name}, Address: {debtor.address}"
+        action="deleted debtor",
+        resource_id=debtor.btw_nummer,
     )
 
     db.session.delete(debtor)
@@ -213,6 +299,7 @@ def register():
         new_user = User(username=username, role="bailiff")
         db.session.add(new_user)
         db.session.commit()
+        log_access(username=username, action="registered account", resource_id=username)
 
         flash("Account created successfully! You can now log in.", "success")
         return redirect(url_for('main.login'))
@@ -252,10 +339,8 @@ def upgrade_user(target_username):
     # Audit log: who performed the action is admin.username
     log_access(
         username=admin.username,
-        action="upgrade_user",
-        resource_type="User",
+        action="upgraded user",
         resource_id=target.username,
-        details=f"Upgraded {target.username} to admin"
     )
 
     flash(f"{target.username} is now an admin!", "success")
@@ -283,10 +368,8 @@ def delete_user(target_username):
 
     log_access(
         username=admin.username,
-        action="delete_user",
-        resource_type="User",
+        action="deleted user",
         resource_id=target.username,
-        details=f"Deleted user {target.username} (role={target.role})"
     )
 
     flash("User deleted successfully.", "success")
