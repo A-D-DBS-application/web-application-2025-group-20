@@ -26,14 +26,14 @@ Authentication is intentionally simplified (username only, no password). The foc
 Webapplication:
 https://web-application-2025-group-20.onrender.com/
 
-User stories:
-https://docs.google.com/document/d/1C9TwLObmLnId3NByVFbiuS_lEH_pztyXOLUHI1_d5h8/edit?usp=sharing
-
 Demo video:
 https://www.loom.com/share/d396203f65634104b2a6b57cdff34e82
 
 Powerpoint:
 https://docs.google.com/presentation/d/1WCyxSuXJUPxY-l5cg-bXd5Erf6RocgO9/edit?usp=drive_link&ouid=109654379017766781848&rtpof=true&sd=true
+
+Link to sprint recordings:
+https://drive.google.com/drive/folders/1XwGTjqb_mozxuLRwYn3E0MuF3bFmm5vi?usp=drive_link
 
 
 
