@@ -29,3 +29,7 @@ https://web-application-2025-group-20.onrender.com/
 
 
 Kanban:
+
+
+User stories:
+    https://docs.google.com/document/d/1C9TwLObmLnId3NByVFbiuS_lEH_pztyXOLUHI1_d5h8/edit?usp=sharing
