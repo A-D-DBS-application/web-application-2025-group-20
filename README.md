@@ -28,7 +28,7 @@ Webapplication:
 https://web-application-2025-group-20.onrender.com/
 
 
-Kanban:
+Demo video:https://www.loom.com/share/d396203f65634104b2a6b57cdff34e82
 
 
 User stories:
