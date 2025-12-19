@@ -35,5 +35,8 @@ https://docs.google.com/presentation/d/1WCyxSuXJUPxY-l5cg-bXd5Erf6RocgO9/edit?us
 Link to sprint recordings:
 https://drive.google.com/drive/folders/1XwGTjqb_mozxuLRwYn3E0MuF3bFmm5vi?usp=drive_link
 
+Supabase:
+https://supabase.com/dashboard/project/agcbqqxapmdmdprcvblj
+
 
 
