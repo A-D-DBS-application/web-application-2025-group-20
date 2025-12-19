@@ -24,12 +24,16 @@ After completing these steps, the application can be started by running `python 
 Authentication is intentionally simplified (username only, no password). The focus of this project is on core MVP functionality and not on production-level security. The database structure is documented using an ERD and corresponding DDL scripts included in the repository.
 
 Webapplication:
-
 https://web-application-2025-group-20.onrender.com/
 
-
-Demo video:https://www.loom.com/share/d396203f65634104b2a6b57cdff34e82
-
-
 User stories:
-    https://docs.google.com/document/d/1C9TwLObmLnId3NByVFbiuS_lEH_pztyXOLUHI1_d5h8/edit?usp=sharing
+https://docs.google.com/document/d/1C9TwLObmLnId3NByVFbiuS_lEH_pztyXOLUHI1_d5h8/edit?usp=sharing
+
+Demo video:
+https://www.loom.com/share/d396203f65634104b2a6b57cdff34e82
+
+Powerpoint:
+https://docs.google.com/presentation/d/1WCyxSuXJUPxY-l5cg-bXd5Erf6RocgO9/edit?slide=id.p11#slide=id.p11
+
+
+
