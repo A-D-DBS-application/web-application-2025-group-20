@@ -34,6 +34,7 @@ https://www.loom.com/share/d396203f65634104b2a6b57cdff34e82
 
 Powerpoint:
 https://docs.google.com/presentation/d/1WCyxSuXJUPxY-l5cg-bXd5Erf6RocgO9/edit?slide=id.p11#slide=id.p11
+https://docs.google.com/presentation/d/1WCyxSuXJUPxY-l5cg-bXd5Erf6RocgO9/edit?usp=drive_link&ouid=109654379017766781848&rtpof=true&sd=true
 
 
 
